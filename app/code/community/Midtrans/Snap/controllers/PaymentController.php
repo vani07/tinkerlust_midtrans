@@ -255,6 +255,49 @@ class Midtrans_Snap_PaymentController
       $this->renderLayout();
   }
 
+  public function successAction(){
+
+     $template = 'snap/success.phtml';
+     $lastorder = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+     $orderid = Mage::getModel('sales/order')->loadByIncrementId($lastorder)->getId();
+
+      //Get current layout state
+      $this->loadLayout();          
+      
+      $block = $this->getLayout()->createBlock(
+          'Mage_Core_Block_Template',
+          'snap',
+          array('template' => $template)
+      );
+      Mage::dispatchEvent('checkout_onepage_controller_success_action', array('order_ids' => array($orderid)));
+      $this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
+      $this->getLayout()->getBlock('content')->append($block);
+      $this->_initLayoutMessages('core/session'); 
+      $this->renderLayout();
+
+  }
+  public function pendingAction(){
+
+     $template = 'snap/pending.phtml';
+     $lastorder = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+     $orderid = Mage::getModel('sales/order')->loadByIncrementId($lastorder)->getId();
+
+      //Get current layout state
+      $this->loadLayout();          
+      
+      $block = $this->getLayout()->createBlock(
+          'Mage_Core_Block_Template',
+          'snap',
+          array('template' => $template)
+      );
+      
+      $this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
+      $this->getLayout()->getBlock('content')->append($block);
+      $this->_initLayoutMessages('core/session'); 
+      $this->renderLayout();
+
+  }
+
   // The response action is triggered when your gateway sends back a response
   // after processing the customer's payment, we will not update to success
   // because success is valid when notification (security reason)
@@ -345,6 +388,7 @@ class Midtrans_Snap_PaymentController
         }
     }
     else if ($transaction == 'cancel' || $transaction == 'deny' ) {
+      $order->cancel();
        $order->setStatus(Mage_Sales_Model_Order::STATE_CANCELED);
     }   
    else if ($transaction == 'settlement') {
@@ -374,6 +418,7 @@ class Midtrans_Snap_PaymentController
             'Thank you, your payment is successfully processed.');
     }
     else if ($transaction == 'cancel') {
+     $order->cancel();
      $order->setStatus(Mage_Sales_Model_Order::STATE_CANCELED);
     }
     else {
