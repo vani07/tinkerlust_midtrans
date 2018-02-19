@@ -23,6 +23,11 @@
  * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
+
+<style>
+
+
+</style>
 <?php 
 $token = Mage::getSingleton('checkout/session')->getToken();
 $_order = new Mage_Sales_Model_Order();
@@ -36,6 +41,8 @@ $mixpanel_key = $env == "production" ? "17253088ed3a39b1e2bd2cbcfeca939a" : "9dc
 $client_key = Mage::getStoreConfig('payment/snap/client_key');
 $merchant_id = Mage::getStoreConfig('payment/snap/merchant_id');
 $base_url = Mage::getBaseUrl();
+$successUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).'snap/payment/success';
+$pendingUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB).'snap/payment/pending';
 
 Mage::log($token.$client_key.$merchant_id,null,'snap.log',true);
 ?>
@@ -44,7 +51,7 @@ Mage::log($token.$client_key.$merchant_id,null,'snap.log',true);
 </style>
 
 <div class="page-title">
-<h1>Your order has been received.</h1>
+<h1 id="order-message"><?php echo $this->__('Please Wait...') ?></h1>
 </div>
 
 <div class="box">
@@ -61,7 +68,8 @@ Mage::log($token.$client_key.$merchant_id,null,'snap.log',true);
     <?php
     }
     ?>
-    
+    <img src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'wysiwyg/midtrans/challenge.png';?>" alt="transaction image status">
+    <h2><?php echo $this->__('ORDER NO. #').$orderId ?></h2>
     <div id="result-type"></div>
     <div id="result-data"></div>
     <div id="status-message"></div>
@@ -79,6 +87,8 @@ var snapToken = "<?=$token?>";
 var merchantId = "<?=$merchant_id?>";
 var mixpanelKey = "<?=$mixpanel_key?>";
 var baseUrl = "<?=$base_url?>"; 
+var successUrl = "<?=$successUrl?>"; 
+var pendingUrl = "<?=$pendingUrl?>"; 
 
     (function(e, a) {
         if (!a.__SV) {
@@ -154,6 +164,7 @@ var baseUrl = "<?=$base_url?>";
           );
     }
 
+    var transactionStatus = document.getElementById('order-message');
     var resultType = document.getElementById('result-type');
     var resultData = document.getElementById('result-data');
     var statusMessage = document.getElementById('status-message');
@@ -208,12 +219,14 @@ var baseUrl = "<?=$base_url?>";
           onSuccess: function(result){
             trackResult(snapToken, merchantId, 'fullpayment', 'success', result);
             changeResult('success', result);
+            window.location.replace(successUrl);
             console.log(result.status_message);
             
           },
           onPending: function(result){
             trackResult(snapToken, merchantId, 'fullpayment', 'pending', result);
             changeResult('pending', result);
+            window.location.replace(pendingUrl);
             console.log(result.status_message);
             
           },

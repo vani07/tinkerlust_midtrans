@@ -1,0 +1,44 @@
+<style>
+  .credit-card-container {
+      text-align:center;
+  }
+
+  .credit-card-container img{
+      width:10%;
+      margin-bottom:2.5em;
+  }
+
+  .credit-card-container .buttons-set{
+      border:none;
+      text-align:center;
+  }
+
+  .credit-card-container .buttons-set button.button{
+      float:none;
+  }
+
+
+
+</style>
+<?php 
+    $orderid = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+?>
+<div class="page-title"><h2><?php echo $this->__('YOUR ORDER HAS BEEN RECEIVED') ?></h2></div>
+<div class="credit-card-container">
+    <img src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).'wysiwyg/midtrans/success.png'; ?>" alt="credit card success"> 
+    <h3><?php echo $this->__('ORDER NO. #').$orderid ?></h3>
+    <div class="buttons-set">
+        <button type="button" class="button" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Continue Shopping')) ?>" onclick="window.location='<?php echo $this->getUrl() ?>'">
+            <span>
+                <span><?php echo $this->__('Continue Shopping') ?></span>
+            </span>
+        </button>
+    </div>    
+        <!-- static block facebook pixel-->
+
+        <?php echo $this->getLayout()->createBlock('cms/block')->setBlockId('facebook_pixel_success')->toHtml() ?>  
+    
+</div>
+<?php 
+    echo $block = $this->getLayout()->createBlock('core/template')->setTemplate('catalog/product/list/recently_viewed.phtml')->toHtml();
+?>
