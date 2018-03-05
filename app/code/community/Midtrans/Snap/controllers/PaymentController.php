@@ -433,9 +433,23 @@ class Midtrans_Snap_PaymentController
         $order = Mage::getModel('sales/order')->loadByIncrementId(
             Mage::getSingleton('checkout/session')->getLastRealOrderId());
         if($order->getId()) {
-      // Flag the order as 'cancelled' and save it
+          // Flag the order as 'cancelled' and save it
           $order->cancel()->setState(Mage_Sales_Model_Order::STATE_CANCELED,
               true, 'Gateway has declined the payment.')->save();
+          $template = 'snap/cancel.phtml';
+          //Get current layout state
+          $this->loadLayout();          
+          
+          $block = $this->getLayout()->createBlock(
+              'Mage_Core_Block_Template',
+              'snap',
+              array('template' => $template)
+          );
+          
+          $this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
+          $this->getLayout()->getBlock('content')->append($block);
+          $this->_initLayoutMessages('core/session'); 
+          $this->renderLayout();
         }
     }
   }
